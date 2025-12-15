@@ -1,4 +1,4 @@
-# Studen  azt Grade Tracking Application
+# Student Grade Tracking Application
 
 ## Project Overview
 This project is a **Student Grade Tracking Application** developed as part of the **B202 Advanced Programming** module at Gisma University of Applied Sciences.
