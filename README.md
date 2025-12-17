@@ -26,3 +26,6 @@ The application is a **Java console-based management system** that allows users 
 1. Download this repository  
 2. Open the project in **IntelliJ IDEA**  
 3. Navigate to:
+
+## Video demonstartion
+https://1drv.ms/v/c/05038fb7bf47b30f/IQAH82MRxWBeRoeto0AL8cOnAdjhb97Z7YstxG-TNTljFgs?e=Af35pg
