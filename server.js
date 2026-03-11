@@ -5,59 +5,51 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-
-// 1. Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/api/auth', require('./routes/auth'));
 
-// 2. Database Connection & Auto-Seeding
+// 1. Routes (Replace with your actual route file names)
+// app.use('/api/tasks', require('./routes/tasks'));
+
+// 2. Database & Auto-Seed
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
     console.log('✅ MongoDB Connected');
     
-    // Seed Tasks if empty
-    const Task = require('./models/Task');
-    const taskCount = await Task.countDocuments();
-    if (taskCount === 0) {
-      await Task.create([
-        { title: "Example: Mathematics Final", status: "Pending" },
-        { title: "Example: Physics Lab", status: "Completed" }
-      ]);
-      console.log('🌱 Task seed data added!');
-    }
-
-    // Seed User if empty
+// Enhanced Seed User Logic
     const User = require('./models/User');
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      await User.create({
-        name: "Admin User",
-        email: "admin@test.com",
-        password: "password123" 
-      });
-      console.log('👤 Default User (admin@test.com) created!');
-    }
-  })
-  .catch(err => console.log('❌ DB Connection Error:', err));
+    
+    try {
+      // Upsert ensures the user is created if missing, or updated if they exist
+      await User.findOneAndUpdate(
+        { email: "admin@test.com" }, 
+        { 
+          name: "Admin User",
+          email: "admin@test.com",
+          password: "password123" 
+        }, 
+        { upsert: true, new: true } 
+      );
+      console.log('👤 Admin User (admin@test.com) is ready!');
 
-// 3. API Routes
-// Note: Ensure you have these files in your /routes folder
-app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/tasks', require('./routes/tasks')); 
+      // DEBUG: Log all users currently in DB to verify
+      const allUsers = await User.find({}, 'email');
+      console.log('📊 Current Registered Emails:', allUsers.map(u => u.email));
 
-// 4. Static File Hosting (Serving React Build)
+    } catch (err) {
+      console.log('❌ Error during user seeding:', err);
+    };
+
+  .catch(err => console.log('❌ DB Error:', err));
+
+// 3. Serve Frontend
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-// 5. Catch-All for React Routing
-// If the request is not an /api call, send the React frontend
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
-// 6. Port for Deployment
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
