@@ -18,7 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
     const User = require('./models/User');
     
     try {
-      // Upsert ensures the user is created if missing, or updated if they exist
+      // This ensures the admin user always exists
       await User.findOneAndUpdate(
         { email: "admin@test.com" }, 
         { 
@@ -36,8 +36,8 @@ mongoose.connect(process.env.MONGO_URI)
     } catch (err) {
       console.log('❌ Error during user seeding:', err);
     } 
-  }) // This closing bracket was the issue!
-  .catch(err => console.log('❌ DB Error:', err));
+  }) // Close .then
+  .catch(err => console.log('❌ DB Error:', err)); // Attach .catch correctly
 
 // 3. API Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -47,7 +47,6 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 
 // 5. Catch-All for React
 app.get('*', (req, res) => {
-  // If it's an API call that doesn't exist, return 404 instead of the HTML page
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ message: "API route not found" });
   }
