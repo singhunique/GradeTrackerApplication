@@ -26,7 +26,7 @@ app.use((req, res, next) => {
   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
-// 5. Port for Render
+// 5. Port for Render (Fixed the syntax error below)
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
