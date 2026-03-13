@@ -3,5 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  margin: 0;
+  padding: 0;
+  background-color: #020617; /* This forces the background to be dark immediately */
 }
