@@ -6,61 +6,64 @@ require('dotenv').config();
 
 const app = express();
 
-// 1. Middleware (Standard MERN)
+// 1. Middleware
 app.use(cors());
 app.use(express.json());
 
-// 2. Database & Advanced Auto-Seed
+// 2. Database & Auto-Seed Logic
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
-    // Green checkmark using a terminal color package (or standard console log)
-    console.log('\x1b[32m%s\x1b[0m', '✅ MongoDB Connected - Student DB Ready');
+    console.log('✅ MongoDB Connected');
     
-    // ==========================================
-    // SEEDING DATA FOR A LIVE PROJECT VIEW
-    // ==========================================
-    const Project = require('./models/Project'); // New Model
-    const Contribution = require('./models/Contribution'); // New Model
+    // Import models for seeding
+    const User = require('./models/User');
+    const Project = require('./models/Project');
+    const Contribution = require('./models/Contribution');
 
     try {
-      // Clear old data for a fresh Student Tracker demo
-      await Project.deleteMany({});
-      await Contribution.deleteMany({});
+      // Ensure Admin User exists
+      await User.findOneAndUpdate(
+        { email: "admin@test.com" }, 
+        { name: "Admin User", email: "admin@test.com", password: "password123" }, 
+        { upsert: true }
+      );
 
-      // Create Sample Projects
-      const projects = await Project.create([
-        { name: "Web Design Final", description: "Design a portfolio website" },
-        { name: "Data Science Project", description: "Analyze user behavior dataset" },
-        { name: "Mobile App Dev", description: "Create a fitness tracking app" }
-      ]);
-      console.log('🚀 Projects Seeded');
-
-      // Create Sample Contributions
-      await Contribution.create([
-        { studentName: "Admin User", projectName: "Web Design Final", activity: "Completed UI/UX mockup in Figma", status: "Done" },
-        { studentName: "Rahul Sharma", projectName: "Web Design Final", activity: "Setup backend database schema", status: "In Progress" },
-        { studentName: "Harsimran", projectName: "Data Science Project", activity: "Started cleaning the initial dataset", status: "Started" }
-      ]);
-      console.log('🌱 Contribution activity seeded!');
-
+      // Seed a sample project if none exist
+      const projectCount = await Project.countDocuments();
+      if (projectCount === 0) {
+        const sampleProj = await Project.create({ 
+          name: "Student Tracker Launch", 
+          description: "Initial setup of the collaboration hub" 
+        });
+        
+        await Contribution.create({
+          studentName: "System",
+          projectName: sampleProj.name,
+          activity: "Database initialized and seeded",
+          status: "Done"
+        });
+        console.log('🌱 Seed data created successfully!');
+      }
     } catch (err) {
-      console.log('❌ Error during advanced seeding:', err);
+      console.log('⚠️ Seeding note:', err.message);
     } 
   })
-  .catch(err => console.log('\x1b[31m%s\x1b[0m', '❌ DB Error:', err));
+  .catch(err => console.log('❌ DB Error:', err));
 
-// 3. New API Routes for Students/Projects
+// 3. API Routes
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/projects', require('./routes/projects')); // Handles project data
-app.use('/api/contributions', require('./routes/contributions')); // Handles student activity
+app.use('/api/projects', require('./routes/projects'));
+app.use('/api/contributions', require('./routes/contributions'));
 
-// 4. Serve Frontend
+// 4. Serve Frontend Static Files
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-// 5. Catch-All for React (Express 5.0 Compatible)
-app.get('/:any*', (req, res) => {
+// 5. Catch-All Route (Fixed for Express 5 compatibility)
+// We use a regex-style string to capture all paths for the React SPA
+app.get('*', (req, res) => {
+  // If the request is looking for an API that doesn't exist, don't send index.html
   if (req.path.startsWith('/api')) {
-    return res.status(404).json({ message: "API route not found" });
+    return res.status(404).json({ message: "API endpoint not found" });
   }
   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
@@ -68,5 +71,5 @@ app.get('/:any*', (req, res) => {
 // 6. Start Server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log('\x1b[36m%s\x1b[0m', `🚀 Student Tracker running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
