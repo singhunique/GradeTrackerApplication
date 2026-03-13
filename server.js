@@ -15,20 +15,17 @@ mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
     console.log('✅ MongoDB Connected');
     
-    // Import models for seeding
     const User = require('./models/User');
     const Project = require('./models/Project');
     const Contribution = require('./models/Contribution');
 
     try {
-      // Ensure Admin User exists
       await User.findOneAndUpdate(
         { email: "admin@test.com" }, 
         { name: "Admin User", email: "admin@test.com", password: "password123" }, 
         { upsert: true }
       );
 
-      // Seed a sample project if none exist
       const projectCount = await Project.countDocuments();
       if (projectCount === 0) {
         const sampleProj = await Project.create({ 
@@ -58,10 +55,9 @@ app.use('/api/contributions', require('./routes/contributions'));
 // 4. Serve Frontend Static Files
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-// 5. Catch-All Route (Fixed for Express 5 compatibility)
-// We use a regex-style string to capture all paths for the React SPA
-app.get('*', (req, res) => {
-  // If the request is looking for an API that doesn't exist, don't send index.html
+// 5. THE FIX FOR EXPRESS 5 (The "Catch-All")
+// We use (.*) which is a regex that Express 5 understands as "everything"
+app.get('(.*)', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ message: "API endpoint not found" });
   }
