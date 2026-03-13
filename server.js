@@ -36,8 +36,8 @@ mongoose.connect(process.env.MONGO_URI)
     } catch (err) {
       console.log('❌ Error during user seeding:', err);
     } 
-  }) // Close .then
-  .catch(err => console.log('❌ DB Error:', err)); // Attach .catch correctly
+  })
+  .catch(err => console.log('❌ DB Error:', err));
 
 // 3. API Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -45,8 +45,9 @@ app.use('/api/auth', require('./routes/auth'));
 // 4. Serve Frontend
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-// 5. Catch-All for React
-app.get('*', (req, res) => {
+// 5. Catch-All for React (Fixed for Express 5.0)
+// Using *path tells Express to capture the remainder of the URL
+app.get('*path', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ message: "API route not found" });
   }
