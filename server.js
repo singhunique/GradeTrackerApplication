@@ -56,8 +56,8 @@ app.use('/api/contributions', require('./routes/contributions'));
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 // 5. THE FIX FOR EXPRESS 5 (The "Catch-All")
-// We use (.*) which is a regex that Express 5 understands as "everything"
-app.get('(.*)', (req, res) => {
+// We use '*any' to give the wildcard a name, which Express 5 requires.
+app.get('*any', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ message: "API endpoint not found" });
   }
