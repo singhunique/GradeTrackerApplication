@@ -1,24 +1,18 @@
 const router = require('express').Router();
 const Project = require('../models/Project');
 
-router.get('/', async (req, res) => {
-  try {
-    const projects = await Project.find();
-    res.json(projects);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching projects" });
-  }
+// GET all contributions to see who has done what
+router.get('/all', async (req, res) => {
+  const projects = await Project.find().sort({ updatedAt: -1 });
+  res.json(projects);
 });
 
+// POST a new contribution
 router.post('/add', async (req, res) => {
-  try {
-    const { name, description } = req.body;
-    const newProject = new Project({ name, description });
-    await newProject.save();
-    res.json({ message: "Project created!" });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
+  const { projectName, studentName, description, status } = req.body;
+  const newEntry = new Project({ projectName, studentName, description, status });
+  await newEntry.save();
+  res.json({ message: "Contribution recorded!" });
 });
 
 module.exports = router;
