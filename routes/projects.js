@@ -1,18 +1,27 @@
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
 const Project = require('../models/Project');
 
-// GET all contributions to see who has done what
-router.get('/all', async (req, res) => {
-  const projects = await Project.find().sort({ updatedAt: -1 });
-  res.json(projects);
+// 1. GET PROJECT INFO: Shows the project name and description at the top
+router.get('/', async (req, res) => {
+    try {
+        const projects = await Project.find();
+        res.json(projects);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching project details" });
+    }
 });
 
-// POST a new contribution
-router.post('/add', async (req, res) => {
-  const { projectName, studentName, description, status } = req.body;
-  const newEntry = new Project({ projectName, studentName, description, status });
-  await newEntry.save();
-  res.json({ message: "Contribution recorded!" });
+// 2. CREATE PROJECT: Setup the group project
+router.post('/create', async (req, res) => {
+    try {
+        const { name, description } = req.body;
+        const newProject = new Project({ name, description });
+        await newProject.save();
+        res.json({ message: "Project created successfully!" });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
 });
 
 module.exports = router;
