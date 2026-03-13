@@ -1,12 +1,15 @@
 const mongoose = require('mongoose');
 
-const TaskSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String },
-  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
-  status: { type: String, enum: ['To Do', 'In Progress', 'Done'], default: 'To Do' },
-  hoursLogged: { type: Number, default: 0 },
-  date: { type: Date, default: Date.now }
+const ProjectSchema = new mongoose.Schema({
+  projectName: { type: String, required: true },
+  studentName: { type: String, required: true }, // Who is doing it
+  description: { type: String },                 // What they contributed
+  status: { 
+    type: String, 
+    enum: ['Pending', 'Contributed', 'Not Started'], 
+    default: 'Not Started' 
+  },
+  updatedAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('task', TaskSchema);
+module.exports = mongoose.model('Project', ProjectSchema);

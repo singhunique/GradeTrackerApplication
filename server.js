@@ -6,48 +6,59 @@ require('dotenv').config();
 
 const app = express();
 
-// 1. Middleware
+// 1. Middleware (Standard MERN)
 app.use(cors());
 app.use(express.json());
 
-// 2. Database & Auto-Seed
+// 2. Database & Advanced Auto-Seed
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
-    console.log('✅ MongoDB Connected');
+    // Green checkmark using a terminal color package (or standard console log)
+    console.log('\x1b[32m%s\x1b[0m', '✅ MongoDB Connected - Student DB Ready');
     
-    const User = require('./models/User');
-    
-    try {
-      // This ensures the admin user always exists
-      await User.findOneAndUpdate(
-        { email: "admin@test.com" }, 
-        { 
-          name: "Admin User",
-          email: "admin@test.com",
-          password: "password123" 
-        }, 
-        { upsert: true, new: true } 
-      );
-      console.log('👤 Admin User (admin@test.com) is ready!');
+    // ==========================================
+    // SEEDING DATA FOR A LIVE PROJECT VIEW
+    // ==========================================
+    const Project = require('./models/Project'); // New Model
+    const Contribution = require('./models/Contribution'); // New Model
 
-      const allUsers = await User.find({}, 'email');
-      console.log('📊 Current Registered Emails:', allUsers.map(u => u.email));
+    try {
+      // Clear old data for a fresh Student Tracker demo
+      await Project.deleteMany({});
+      await Contribution.deleteMany({});
+
+      // Create Sample Projects
+      const projects = await Project.create([
+        { name: "Web Design Final", description: "Design a portfolio website" },
+        { name: "Data Science Project", description: "Analyze user behavior dataset" },
+        { name: "Mobile App Dev", description: "Create a fitness tracking app" }
+      ]);
+      console.log('🚀 Projects Seeded');
+
+      // Create Sample Contributions
+      await Contribution.create([
+        { studentName: "Admin User", projectName: "Web Design Final", activity: "Completed UI/UX mockup in Figma", status: "Done" },
+        { studentName: "Rahul Sharma", projectName: "Web Design Final", activity: "Setup backend database schema", status: "In Progress" },
+        { studentName: "Harsimran", projectName: "Data Science Project", activity: "Started cleaning the initial dataset", status: "Started" }
+      ]);
+      console.log('🌱 Contribution activity seeded!');
 
     } catch (err) {
-      console.log('❌ Error during user seeding:', err);
+      console.log('❌ Error during advanced seeding:', err);
     } 
   })
-  .catch(err => console.log('❌ DB Error:', err));
+  .catch(err => console.log('\x1b[31m%s\x1b[0m', '❌ DB Error:', err));
 
-// 3. API Routes
+// 3. New API Routes for Students/Projects
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/projects', require('./routes/projects')); // Handles project data
+app.use('/api/contributions', require('./routes/contributions')); // Handles student activity
 
 // 4. Serve Frontend
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-// 5. Catch-All for React (Fixed for Express 5.0)
-// Using *path tells Express to capture the remainder of the URL
-app.get('*path', (req, res) => {
+// 5. Catch-All for React (Express 5.0 Compatible)
+app.get('/:any*', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ message: "API route not found" });
   }
@@ -57,5 +68,5 @@ app.get('*path', (req, res) => {
 // 6. Start Server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log('\x1b[36m%s\x1b[0m', `🚀 Student Tracker running on port ${PORT}`);
 });
