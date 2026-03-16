@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Plus, User, ClipboardList, Send, Trash2, LogOut, 
-  CheckCircle2, Clock, Calendar, AlertCircle
+iimport { 
+  Plus, User, Trash2, LogOut, Calendar, 
+  ShieldCheck, Lock, CheckCircle2, Clock, Activity // <-- ADD 'Activity' HERE
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
