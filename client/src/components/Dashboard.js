@@ -11,18 +11,19 @@ const Dashboard = () => {
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState([{ id: 1, user: "System", text: "Master Terminal Online", time: "Live" }]);
   
-  // Master State
   const [team, setTeam] = useState([
     { studentId: 1, name: "Student 1", role: "Documentation Lead", task: "Chapters 1-5", status: "Pending", color: "#f43f5e", icon: <FileText size={20} /> },
     { studentId: 2, name: "Student 2", role: "Visuals & PPT", task: "15 Slides", status: "Pending", color: "#3b82f6", icon: <MonitorPlay size={20} /> },
     { studentId: 3, name: "Student 3", role: "Researcher", task: "Case Studies", status: "Pending", color: "#8b5cf6", icon: <Users size={20} /> }
   ]);
 
-  // Sync with MongoDB
+  // Handle Environment-based API Routing
+  const API_BASE = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000';
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/contributions/all');
+        const response = await fetch(`${API_BASE}/api/contributions/all`);
         const data = await response.json();
         if (data && data.length > 0) {
           setTeam(prevTeam => prevTeam.map(member => {
@@ -33,10 +34,9 @@ const Dashboard = () => {
       } catch (error) { console.error("Master Sync Error:", error); }
     };
     fetchData();
-    // Poll every 10 seconds for real-time team updates
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [API_BASE]);
 
   const cycleStatus = async (id) => {
     const statusMap = [
@@ -50,7 +50,7 @@ const Dashboard = () => {
     setTeam(team.map(m => m.studentId === id ? { ...m, status: next.status, color: next.color } : m));
 
     try {
-      await fetch(`/api/contributions/update/${id}`, {
+      await fetch(`${API_BASE}/api/contributions/update/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: next.status, color: next.color })
@@ -62,7 +62,7 @@ const Dashboard = () => {
   const handleReset = async () => {
     if (window.confirm("CRITICAL: Wipe all team data and reset project to 0%?")) {
       try {
-        await fetch('/api/contributions/reset', { method: 'POST' });
+        await fetch(`${API_BASE}/api/contributions/reset`, { method: 'POST' });
         setTeam(team.map(m => ({ ...m, status: "Pending", color: "#f43f5e" })));
         toast.success("System Purged & Reset");
       } catch (error) { toast.error("Reset Error"); }
@@ -81,8 +81,6 @@ const Dashboard = () => {
 
   return (
     <div style={{ backgroundColor: '#020617', minHeight: '100vh', color: '#f8fafc', fontFamily: 'system-ui, sans-serif', padding: '40px 20px' }}>
-      
-      {/* --- TOP METRICS BAR --- */}
       <div style={{ maxWidth: '1200px', margin: '0 auto 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
         <div style={metricCardStyle}><Activity size={18} color="#3b82f6" /> Team Health: <span style={{color: '#10b981', marginLeft: '5px'}}>OPTIMAL</span></div>
         <div style={metricCardStyle}><BarChart3 size={18} color="#8b5cf6" /> Completion: <span style={{marginLeft: '5px'}}>{progressPercent}%</span></div>
@@ -96,10 +94,9 @@ const Dashboard = () => {
         <p style={{ color: '#64748b', fontWeight: 'bold', marginTop: '10px' }}>PROJECT COMMAND & CONTROL</p>
       </div>
 
-      {/* --- MASTER GRID --- */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '30px' }}>
         {team.map((member) => (
-          <div key={member.studentId} style={{ background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(10px)', border: `1px solid ${member.color}20`, borderRadius: '24px', padding: '30px', position: 'relative' }}>
+          <div key={member.studentId} style={{ background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(10px)', border: `1px solid ${member.color}20`, borderRadius: '24px', padding: '30px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
               <div style={{ color: member.color, background: `${member.color}10`, padding: '10px', borderRadius: '12px' }}>{member.icon}</div>
               <div>
@@ -110,11 +107,9 @@ const Dashboard = () => {
                 {member.status}
               </div>
             </div>
-            
             <div style={{ background: '#0f172a', padding: '15px', borderRadius: '15px', marginBottom: '20px', border: '1px solid #1e293b' }}>
               <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8' }}>{member.task}</p>
             </div>
-
             <button onClick={() => cycleStatus(member.studentId)} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid #1e293b', background: 'transparent', color: member.color, fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}>
               OVERRIDE STATUS
             </button>
@@ -122,7 +117,6 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* --- GLOBAL PROGRESS --- */}
       <div style={{ maxWidth: '1200px', margin: '50px auto', background: 'rgba(15, 23, 42, 0.6)', padding: '40px', borderRadius: '32px', border: '1px solid #1e293b' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', alignItems: 'flex-end' }}>
             <div>
@@ -138,12 +132,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* --- FAB CHAT --- */}
-      <button onClick={() => setIsChatOpen(true)} style={{ position: 'fixed', bottom: '30px', right: '30px', width: '60px', height: '60px', borderRadius: '20px', background: '#3b82f6', border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)' }}><MessageSquare size={24} /></button>
+      <button onClick={() => setIsChatOpen(true)} style={{ position: 'fixed', bottom: '30px', right: '30px', width: '60px', height: '60px', borderRadius: '20px', background: '#3b82f6', border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><MessageSquare size={24} /></button>
 
-      {/* --- CHAT DRAWER --- */}
       {isChatOpen && (
-        <div style={{ position: 'fixed', top: 0, right: 0, height: '100vh', width: '400px', background: '#0b1120', borderLeft: '1px solid #1e293b', zIndex: 1000, display: 'flex', flexDirection: 'column', animation: 'slideIn 0.3s ease' }}>
+        <div style={{ position: 'fixed', top: 0, right: 0, height: '100vh', width: '400px', background: '#0b1120', borderLeft: '1px solid #1e293b', zIndex: 1000, display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '25px', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '900' }}>COMMAND LOG</h3>
             <X onClick={() => setIsChatOpen(false)} style={{ cursor: 'pointer', color: '#475569' }} />

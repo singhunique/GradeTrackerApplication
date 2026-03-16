@@ -7,6 +7,7 @@ import { LogOut, ShieldCheck } from 'lucide-react';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Simple conditional rendering - no react-router-dom needed
   return (
     <div style={{ 
       backgroundColor: '#020617', 
@@ -38,7 +39,7 @@ function App() {
             <ShieldCheck size={20} color="white" />
           </div>
           <h1 style={{ fontSize: '18px', fontWeight: '900', margin: 0, letterSpacing: '-0.5px' }}>
-            STUDENT<span style={{ color: '#3b82f6' }}>.</span>FLOW
+            MASTER<span style={{ color: '#3b82f6' }}>.</span>FLOW
           </h1>
         </div>
 
