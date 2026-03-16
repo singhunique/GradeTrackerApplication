@@ -1,113 +1,140 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { Lock, Mail, ChevronRight, LayoutDashboard, ShieldCheck } from 'lucide-react';
 
-const Login = ({ onLoginSuccess }) => {
+const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // 1. Normalize data (remove spaces and lowercase)
-    const cleanEmail = email.trim().toLowerCase();
-
-    try {
-      // 2. Send request to your Render backend
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: cleanEmail, 
-          password: password 
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success(`Welcome back, ${data.user.name}!`);
-        // Small delay so the user sees the success toast before the screen changes
-        setTimeout(() => {
-          onLoginSuccess();
-        }, 800);
-      } else {
-        // Displays "User not found" or "Incorrect password" from your server
-        toast.error(data.message || "Login failed");
-      }
-    } catch (error) {
-      toast.error("Server is waking up... please try again in a moment.");
-    } finally {
+    
+    // Simulate a professional login delay
+    setTimeout(() => {
+      console.log("Logging in with:", email);
+      navigate('/dashboard'); // Directs to your new dashboard
       setIsLoading(false);
-    }
+    }, 1500);
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-[32px] shadow-xl border border-slate-100 p-10"
-      >
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-4 shadow-lg shadow-indigo-200">
-            <Lock size={28} />
+    <div style={{ 
+      backgroundColor: '#020617', 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      backgroundImage: `radial-gradient(circle at center, rgba(59, 130, 246, 0.1), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png')`,
+      padding: '20px',
+      boxSizing: 'border-box'
+    }}>
+      
+      {/* --- MAIN LOGIN CARD --- */}
+      <div style={{ 
+        width: '100%', 
+        maxWidth: '450px', 
+        background: 'rgba(15, 23, 42, 0.6)', 
+        backdropFilter: 'blur(16px)', 
+        border: '1px solid rgba(255, 255, 255, 0.1)', 
+        borderRadius: '40px', 
+        padding: '50px 40px', 
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        
+        {/* Top Glow Accent */}
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '200px', height: '2px', background: 'linear-gradient(90deg, transparent, #3b82f6, transparent)' }}></div>
+
+        {/* --- LOGO --- */}
+        <div style={{ marginBottom: '40px' }}>
+          <div style={{ width: '64px', height: '64px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center', margin: '0 auto 20px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+            <ShieldCheck size={32} color="#3b82f6" />
           </div>
-          <h2 className="text-3xl font-black text-slate-900">Sign In</h2>
-          <p className="text-slate-500 mt-2 font-medium">Use admin@test.com to enter</p>
+          <h1 style={{ color: 'white', fontSize: '32px', fontWeight: '900', margin: 0, letterSpacing: '-1.5px' }}>
+            WELCOME<span style={{ color: '#3b82f6' }}>.</span>BACK
+          </h1>
+          <p style={{ color: '#64748b', fontSize: '14px', marginTop: '8px' }}>Enter your credentials to access the Portal</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+        {/* --- FORM --- */}
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Email Input */}
+          <div style={{ position: 'relative', textAlign: 'left' }}>
+            <label style={{ fontSize: '11px', fontWeight: '900', color: '#475569', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: '16px', marginBottom: '8px', display: 'block' }}>Email Address</label>
+            <div style={{ position: 'relative' }}>
+              <Mail size={18} color="#475569" style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)' }} />
               <input 
                 type="email" 
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-indigo-500 transition-all font-medium disabled:opacity-50"
-                placeholder="admin@test.com"
-                required
+                placeholder="student@university.edu"
+                style={{ width: '100%', padding: '16px 16px 16px 50px', borderRadius: '16px', background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.05)', color: 'white', outline: 'none', boxSizing: 'border-box', transition: 'border 0.3s' }}
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 ml-1">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+          {/* Password Input */}
+          <div style={{ position: 'relative', textAlign: 'left' }}>
+            <label style={{ fontSize: '11px', fontWeight: '900', color: '#475569', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: '16px', marginBottom: '8px', display: 'block' }}>Password</label>
+            <div style={{ position: 'relative' }}>
+              <Lock size={18} color="#475569" style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)' }} />
               <input 
                 type="password" 
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-indigo-500 transition-all font-medium disabled:opacity-50"
                 placeholder="••••••••"
-                required
+                style={{ width: '100%', padding: '16px 16px 16px 50px', borderRadius: '16px', background: 'rgba(0, 0, 0, 0.2)', border: '1px solid rgba(255, 255, 255, 0.05)', color: 'white', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
           </div>
 
+          {/* Login Button */}
           <button 
-            type="submit"
+            type="submit" 
             disabled={isLoading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 group disabled:bg-slate-400"
-          >
-            {isLoading ? (
-              <Loader2 className="animate-spin" size={20} />
-            ) : (
-              <>
-                Continue <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </>
-            )}
+            style={{ 
+              marginTop: '10px',
+              padding: '18px', 
+              borderRadius: '18px', 
+              border: 'none', 
+              background: isLoading ? '#1e293b' : 'linear-gradient(90deg, #3b82f6, #2563eb)', 
+              color: 'white', 
+              fontWeight: '900', 
+              fontSize: '15px', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '10px',
+              boxShadow: '0 10px 25px rgba(37, 99, 235, 0.3)',
+              transition: '0.3s'
+            }}>
+            {isLoading ? 'AUTHENTICATING...' : 'ACCESS PORTAL'}
+            {!isLoading && <ChevronRight size={18} />}
           </button>
         </form>
-      </motion.div>
+
+        {/* --- FOOTER --- */}
+        <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+          <p style={{ color: '#475569', fontSize: '13px' }}>
+            Don't have an account? <span style={{ color: '#3b82f6', fontWeight: 'bold', cursor: 'pointer' }}>Register Team</span>
+          </p>
+        </div>
+
+      </div>
+
+      {/* Background Decorative Blur */}
+      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '40%', height: '40%', background: 'rgba(59, 130, 246, 0.05)', filter: 'blur(100px)', borderRadius: '50%', zIndex: -1 }}></div>
+
     </div>
   );
 };

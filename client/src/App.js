@@ -2,36 +2,61 @@ import React, { useState } from 'react';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import { Toaster } from 'react-hot-toast';
+import { LogOut, ShieldCheck } from 'lucide-react';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
-    <div className="App min-h-screen bg-slate-50">
+    <div style={{ 
+      backgroundColor: '#020617', 
+      minHeight: '100vh', 
+      color: 'white', 
+      fontFamily: 'system-ui, -apple-system, sans-serif' 
+    }}>
       <Toaster position="top-center" reverseOrder={false} />
 
-      {/* Modern Header */}
-      <header className="bg-white border-b border-slate-100 py-6 px-8 flex justify-between items-center shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-            G
+      {/* --- CYBER HEADER --- */}
+      <header style={{ 
+        background: 'rgba(15, 23, 42, 0.8)', 
+        backdropFilter: 'blur(12px)', 
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)', 
+        padding: '15px 40px', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ 
+            width: '35px', height: '35px', background: '#3b82f6', 
+            borderRadius: '10px', display: 'flex', alignItems: 'center', 
+            justifyContent: 'center', boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)' 
+          }}>
+            <ShieldCheck size={20} color="white" />
           </div>
-          <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">
-            Contribution Tracker
+          <h1 style={{ fontSize: '18px', fontWeight: '900', margin: 0, letterSpacing: '-0.5px' }}>
+            STUDENT<span style={{ color: '#3b82f6' }}>.</span>FLOW
           </h1>
         </div>
+
         {isLoggedIn && (
           <button 
             onClick={() => setIsLoggedIn(false)}
-            className="text-sm font-bold text-red-500 hover:bg-red-50 px-4 py-2 rounded-xl transition-colors"
-          >
-            Logout
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '8px', 
+              background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', 
+              color: '#ef4444', padding: '8px 16px', borderRadius: '12px', 
+              fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' 
+            }}>
+            <LogOut size={14} /> LOGOUT
           </button>
         )}
       </header>
 
-      <main className="max-w-7xl mx-auto">
-        {/* If not logged in, show Login. If logged in, show Dashboard. */}
+      <main style={{ width: '100%' }}>
         {!isLoggedIn ? (
           <Login onLoginSuccess={() => setIsLoggedIn(true)} />
         ) : (

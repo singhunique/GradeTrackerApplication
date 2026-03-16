@@ -2,40 +2,39 @@ const express = require('express');
 const router = express.Router();
 const Contribution = require('../models/Contribution');
 
-// 1. GET ALL: Load the team tasks for the dashboard
+// GET ALL: Loads current status from MongoDB
 router.get('/all', async (req, res) => {
-    try {
-        const contributions = await Contribution.find().sort({ studentName: 1 });
-        res.json(contributions);
-    } catch (err) {
-        res.status(500).json({ message: "Error fetching team data" });
-    }
+  try {
+    const allData = await Contribution.find().sort({ studentId: 1 });
+    res.json(allData);
+  } catch (err) {
+    res.status(500).json({ message: "Database Error: " + err.message });
+  }
 });
 
-// 2. UPDATE STATUS: The core function for your "Update" button
-router.put('/update/:id', async (req, res) => {
-    try {
-        const { status } = req.body;
-        const updatedContribution = await Contribution.findByIdAndUpdate(
-            req.params.id,
-            { status: status },
-            { new: true } // Returns the updated document
-        );
-        res.json(updatedContribution);
-    } catch (err) {
-        res.status(400).json({ message: "Update failed" });
-    }
+// UPDATE: Saves status for a specific student
+router.put('/update/:studentId', async (req, res) => {
+  try {
+    const { status, color } = req.body;
+    const updated = await Contribution.findOneAndUpdate(
+      { studentId: parseInt(req.params.studentId) },
+      { status, color },
+      { new: true, upsert: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Update Error: " + err.message });
+  }
 });
 
-// 3. ADD NEW: If you want to add a 4th student or a new task
-router.post('/add', async (req, res) => {
-    try {
-        const newEntry = new Contribution(req.body);
-        await newEntry.save();
-        res.json({ message: "Task assigned!" });
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
+// RESET ALL: Wipes the board back to 0% (Admin Feature)
+router.post('/reset', async (req, res) => {
+  try {
+    await Contribution.updateMany({}, { status: "Pending", color: "#f43f5e" });
+    res.json({ message: "All student progress has been reset." });
+  } catch (err) {
+    res.status(500).json({ message: "Reset Error: " + err.message });
+  }
 });
 
 module.exports = router;
