@@ -57,25 +57,21 @@ app.use('/api/contributions', require('./routes/contributions'));
 
 // 4. Production Deployment Logic
 if (process.env.NODE_ENV === 'production') {
-  // Use resolve to get the absolute path to the build folder
-  const buildPath = path.resolve(__dirname, 'client', 'build');
+  // 1. Force the path to point to the build folder correctly
+  const buildPath = path.join(__dirname, 'client', 'build');
   
+  // 2. Serve static files from that path
   app.use(express.static(buildPath));
 
+  // 3. Catch-all route for React Router (Express 5 compatible)
   app.get('/*splat', (req, res) => {
+    // Only send index.html if the request is NOT for an API
     if (!req.path.startsWith('/api')) {
-      // Log for debugging (you can see this in Render logs)
-      console.log("Serving index.html from:", path.join(buildPath, 'index.html'));
-      res.sendFile(path.join(buildPath, 'index.html'));
-    }
-  });
-}
-
-  // EXPRESS 5 FIX: The syntax "*splat" creates a named parameter 
-  // that matches everything after the slash.
-  app.get('/*splat', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(buildPath, 'index.html'));
+      res.sendFile(path.join(buildPath, 'index.html'), (err) => {
+        if (err) {
+          res.status(500).send("Error loading frontend. Check build path: " + buildPath);
+        }
+      });
     }
   });
 }
