@@ -1,26 +1,31 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Added
+import toast from 'react-hot-toast'; // Added
 import { Lock, Mail, ChevronRight, ShieldCheck } from 'lucide-react';
 
-// 1. Accept the onLoginSuccess prop here
-const Login = ({ onLoginSuccess }) => {
-  
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
+
   const handleLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     // Simulate a professional login delay
     setTimeout(() => {
-      // 1. Store the user's email in the browser's memory
+      // 1. Store the user's email and name
       localStorage.setItem('userEmail', email); 
-      
-      // 2. Extract a "Name" from the email (e.g., "john" from "john@gmail.com")
       const displayName = email.split('@')[0];
       localStorage.setItem('userName', displayName);
 
-      toast.success(`Logged in as ${displayName}`);
+      // 2. CRITICAL: Store a 'token' so ProtectedRoute lets us in
+      localStorage.setItem('token', 'simulated-jwt-token');
+
+      toast.success(`Welcome back, ${displayName}!`);
+      
+      // 3. Redirect to the protected dashboard
       navigate('/dashboard'); 
       setIsLoading(false);
     }, 1500);
@@ -53,6 +58,7 @@ const Login = ({ onLoginSuccess }) => {
         overflow: 'hidden'
       }}>
         
+        {/* Decorative Top Line */}
         <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '200px', height: '2px', background: 'linear-gradient(90deg, transparent, #3b82f6, transparent)' }}></div>
 
         <div style={{ marginBottom: '40px' }}>
@@ -119,6 +125,26 @@ const Login = ({ onLoginSuccess }) => {
             {!isLoading && <ChevronRight size={18} />}
           </button>
         </form>
+        {/* --- Link to Register --- */}
+<p style={{ 
+  marginTop: '25px', 
+  color: '#64748b', 
+  fontSize: '14px', 
+  fontWeight: '500' 
+}}>
+  Don't have an account?{' '}
+  <span 
+    onClick={() => navigate('/register')} 
+    style={{ 
+      color: '#3b82f6', 
+      cursor: 'pointer', 
+      fontWeight: '700',
+      textDecoration: 'underline'
+    }}
+  >
+    Create one now
+  </span>
+</p>
       </div>
     </div>
   );
