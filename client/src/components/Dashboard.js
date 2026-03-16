@@ -1,147 +1,223 @@
 import React, { useState } from 'react';
-import { FileText, MonitorPlay, Users, CheckCircle, Clock, MessageSquare, Send, X, RefreshCcw } from 'lucide-react';
+import { FileText, MonitorPlay, Users, CheckCircle, Clock, MessageSquare, Send, X, RefreshCcw, LayoutDashboard } from 'lucide-react';
 
 const Dashboard = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [chatInput, setChatInput] = useState("");
+  const [messages, setMessages] = useState([
+    { id: 1, user: "Student 3", text: "Finished the research charts! 📊", time: "10:15 AM" },
+    { id: 2, user: "Student 1", text: "Got it. Adding to Chapter 3 now.", time: "10:20 AM" }
+  ]);
 
-  // Your Core Team Data
-  const teamData = [
+  // 1. Live State for 3-Student Team
+  const [team, setTeam] = useState([
     { 
-        id: 1, 
-        name: "Student 1", 
-        role: "Report & Documentation", 
-        task: "Compiling Chapters 1-5, References, and Appendix.", 
-        status: "Done", 
-        color: "#3b82f6", 
-        icon: <FileText size={28} /> 
+      id: 1, 
+      name: "Student 1", 
+      role: "Documentation Lead", 
+      task: "Writing Chapters 1-5 & References", 
+      status: "Done", 
+      color: "#10b981", 
+      icon: <FileText size={28} /> 
     },
     { 
-        id: 2, 
-        name: "Student 2", 
-        role: "Visual Presentation", 
-        task: "Designing 15 Interactive Slides with Animations.", 
-        status: "In Progress", 
-        color: "#a855f7", 
-        icon: <MonitorPlay size={28} /> 
+      id: 2, 
+      name: "Student 2", 
+      role: "Visuals & PPT", 
+      task: "Designing 15 Interactive Slides", 
+      status: "In Progress", 
+      color: "#3b82f6", 
+      icon: <MonitorPlay size={28} /> 
     },
     { 
-        id: 3, 
-        name: "Student 3", 
-        role: "Data & Research", 
-        task: "Gathering Case Studies and Market Survey Results.", 
-        status: "Pending", 
-        color: "#f59e0b", 
-        icon: <Users size={28} /> 
+      id: 3, 
+      name: "Student 3", 
+      role: "Data Researcher", 
+      task: "Gathering Case Studies & Stats", 
+      status: "Pending", 
+      color: "#f43f5e", 
+      icon: <Users size={28} /> 
     }
-  ];
+  ]);
 
-  // Inline styles to guarantee the "Attractive" look regardless of CSS config
-  const glassStyle = {
-    background: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '40px',
+  // 2. Logic: Cycle Status & Color on Click
+  const cycleStatus = (id) => {
+    const statusMap = [
+      { status: "Pending", color: "#f43f5e" },
+      { status: "In Progress", color: "#3b82f6" },
+      { status: "Done", color: "#10b981" }
+    ];
+
+    setTeam(team.map(member => {
+      if (member.id === id) {
+        const currentIndex = statusMap.findIndex(s => s.status === member.status);
+        const next = statusMap[(currentIndex + 1) % statusMap.length];
+        return { ...member, status: next.status, color: next.color };
+      }
+      return member;
+    }));
   };
+
+  // 3. Logic: Send Message
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    const newMsg = { id: Date.now(), user: "You", text: chatInput, time: "Just now" };
+    setMessages([...messages, newMsg]);
+    setChatInput("");
+  };
+
+  // Calculate Progress %
+  const totalDone = team.filter(m => m.status === "Done").length;
+  const progressPercent = Math.round((totalDone / 3) * 100);
 
   return (
     <div style={{ 
       backgroundColor: '#020617', 
       minHeight: '100vh', 
-      color: 'white', 
+      color: '#f8fafc', 
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      backgroundImage: `radial-gradient(circle at top right, rgba(59, 130, 246, 0.1), transparent), radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.1), transparent), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072')`,
-      backgroundSize: 'cover',
-      backgroundAttachment: 'fixed',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center'
+      backgroundImage: `radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png')`,
+      padding: '40px 20px'
     }}>
-
-      {/* --- HEADER SECTION --- */}
-      <header style={{ width: '100%', maxWidth: '1200px', padding: '60px 20px', textAlign: 'center' }}>
-        <div style={{ display: 'inline-block', padding: '6px 16px', borderRadius: '100px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#60a5fa', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '20px' }}>
-          LIVE COLLABORATION HUB
+      
+      {/* --- HEADER --- */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto 60px', textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '100px', color: '#60a5fa', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '20px' }}>
+          <LayoutDashboard size={14} /> GROUP COLLABORATION PORTAL
         </div>
-        <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 5rem)', fontWeight: 900, margin: 0, letterSpacing: '-2px', lineHeight: 1 }}>
-          TEAM<span style={{ color: '#3b82f6' }}>.</span>PORTAL
+        <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: '900', margin: 0, letterSpacing: '-3px', lineHeight: 1 }}>
+          STUDENT<span style={{ color: '#3b82f6' }}>.</span>FLOW
         </h1>
-        <p style={{ color: '#94a3b8', fontSize: '18px', marginTop: '15px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
-          Tracking the contribution of three students in real-time.
-        </p>
-      </header>
+        <p style={{ color: '#64748b', fontSize: '18px', marginTop: '10px' }}>Real-time synchronization for three-person project teams.</p>
+      </div>
 
-      {/* --- 3-STUDENT TEAM GRID --- */}
-      <main style={{ width: '100%', maxWidth: '1200px', padding: '0 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px' }}>
-        {teamData.map((student) => (
-          <div key={student.id} style={glassStyle} className="card-hover">
-            <div style={{ padding: '40px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
-                <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: `${student.color}15`, border: `1px solid ${student.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: student.color }}>
-                  {student.icon}
-                </div>
-                <div style={{ background: `${student.color}10`, color: student.color, padding: '4px 12px', borderRadius: '8px', fontSize: '10px', fontWeight: '900', border: `1px solid ${student.color}20` }}>
-                  {student.status.toUpperCase()}
-                </div>
+      {/* --- 3-STUDENT GRID (CENTERED) --- */}
+      <div style={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+        gap: '30px' 
+      }}>
+        {team.map((member) => (
+          <div key={member.id} style={{ 
+            background: 'rgba(15, 23, 42, 0.6)', 
+            backdropFilter: 'blur(12px)', 
+            border: `1px solid ${member.color}30`, 
+            borderRadius: '32px', 
+            padding: '40px', 
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Status Background Glow */}
+            <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: member.color, filter: 'blur(60px)', opacity: 0.1 }}></div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+              <div style={{ width: '60px', height: '60px', borderRadius: '20px', background: `${member.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: member.color, border: `1px solid ${member.color}20` }}>
+                {member.icon}
               </div>
-
-              <h2 style={{ fontSize: '28px', fontWeight: '900', margin: '0 0 5px 0' }}>{student.name}</h2>
-              <p style={{ color: student.color, fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '25px' }}>{student.role}</p>
-              
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '30px' }}>
-                <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>Current Milestone</span>
-                <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#cbd5e1' }}>{student.task}</p>
+              <div style={{ background: `${member.color}10`, color: member.color, padding: '4px 12px', borderRadius: '8px', fontSize: '10px', fontWeight: '900', border: `1px solid ${member.color}30`, letterSpacing: '1px' }}>
+                {member.status.toUpperCase()}
               </div>
-
-              <button style={{ width: '100%', padding: '16px', borderRadius: '16px', border: 'none', background: student.color, color: 'white', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s', boxShadow: `0 10px 20px ${student.color}20` }}>
-                Update Progress
-              </button>
             </div>
+
+            <h2 style={{ fontSize: '26px', fontWeight: '900', margin: '0 0 4px 0', letterSpacing: '-1px' }}>{member.name}</h2>
+            <p style={{ color: member.color, fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '24px' }}>{member.role}</p>
+            
+            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.03)', marginBottom: '32px' }}>
+              <span style={{ fontSize: '10px', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>Current Assignment</span>
+              <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#94a3b8' }}>{member.task}</p>
+            </div>
+
+            <button 
+              onClick={() => cycleStatus(member.id)}
+              style={{ 
+                width: '100%', 
+                padding: '16px', 
+                borderRadius: '16px', 
+                border: 'none', 
+                background: member.color, 
+                color: 'white', 
+                fontWeight: 'bold', 
+                fontSize: '13px',
+                cursor: 'pointer', 
+                transition: 'transform 0.2s',
+                boxShadow: `0 10px 20px ${member.color}20`
+              }}
+              onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'}
+              onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              Update Status
+            </button>
           </div>
         ))}
-      </main>
+      </div>
 
-      {/* --- PROGRESS FOOTER --- */}
-      <footer style={{ width: '100%', maxWidth: '900px', padding: '60px 20px' }}>
-        <div style={{ ...glassStyle, padding: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#94a3b8', letterSpacing: '1px' }}>PROJECT COMPLETION</span>
-            <span style={{ fontSize: '24px', fontWeight: '900', color: '#3b82f6' }}>66%</span>
-          </div>
-          <div style={{ width: '100%', height: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
-            <div style={{ width: '66%', height: '100%', background: 'linear-gradient(90deg, #3b82f6, #a855f7)', boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)' }}></div>
-          </div>
+      {/* --- LIVE PROGRESS BAR --- */}
+      <div style={{ maxWidth: '900px', margin: '60px auto 0', padding: '30px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '32px', backdropFilter: 'blur(10px)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <span style={{ fontSize: '12px', fontWeight: '900', color: '#475569', letterSpacing: '2px' }}>GLOBAL PROJECT HEALTH</span>
+          <span style={{ fontSize: '24px', fontWeight: '900', color: '#3b82f6' }}>{progressPercent}%</span>
         </div>
-      </footer>
+        <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '100px', overflow: 'hidden', padding: '2px' }}>
+          <div style={{ 
+            width: `${progressPercent}%`, 
+            height: '100%', 
+            background: 'linear-gradient(90deg, #3b82f6, #10b981)', 
+            borderRadius: '100px',
+            transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: '0 0 20px rgba(59, 130, 246, 0.4)'
+          }}></div>
+        </div>
+      </div>
 
-      {/* --- FLOATING CHAT TRIGGER --- */}
+      {/* --- FLOATING CHAT BUTTON --- */}
       <button 
         onClick={() => setIsChatOpen(true)}
         style={{ position: 'fixed', bottom: '40px', right: '40px', width: '70px', height: '70px', borderRadius: '50%', background: '#3b82f6', border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 10px 40px rgba(59, 130, 246, 0.4)', zIndex: 100 }}>
-        <MessageSquare size={30} />
+        <MessageSquare size={28} />
       </button>
 
-      {/* --- CHAT SIDEBAR --- */}
+      {/* --- SIDEBAR CHAT DRAWER --- */}
       <div style={{ 
-        position: 'fixed', top: 0, right: 0, height: '100vh', width: '350px', 
+        position: 'fixed', top: 0, right: 0, height: '100vh', width: '380px', 
         background: '#0b1120', borderLeft: '1px solid rgba(255,255,255,0.1)', 
         zIndex: 200, transform: isChatOpen ? 'translateX(0)' : 'translateX(100%)', 
-        transition: '0.5s cubic-bezier(0.4, 0, 0.2, 1)', padding: '30px',
-        display: 'flex', flexDirection: 'column'
+        transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+        display: 'flex', flexDirection: 'column', boxShadow: '-20px 0 60px rgba(0,0,0,0.5)'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-          <h3 style={{ margin: 0, fontWeight: 900 }}>TEAM CHAT</h3>
-          <X onClick={() => setIsChatOpen(false)} style={{ cursor: 'pointer' }} />
+        <div style={{ padding: '30px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0, fontWeight: 900, fontSize: '20px', italic: 'italic' }}>TEAM<span style={{ color: '#3b82f6' }}>.</span>CHAT</h3>
+          <X onClick={() => setIsChatOpen(false)} style={{ cursor: 'pointer', color: '#475569' }} />
         </div>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '15px', marginBottom: '15px' }}>
-                <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#3b82f6' }}>STUDENT 3</span>
-                <p style={{ margin: '5px 0 0 0', fontSize: '13px' }}>I've uploaded the research files to the drive.</p>
+        
+        <div style={{ flex: 1, overflowY: 'auto', padding: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {messages.map(m => (
+            <div key={m.id} style={{ alignSelf: m.user === "You" ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+              <span style={{ fontSize: '10px', fontWeight: '900', color: '#3b82f6', display: 'block', marginBottom: '4px', textAlign: m.user === "You" ? 'right' : 'left' }}>{m.user}</span>
+              <div style={{ background: m.user === "You" ? '#3b82f6' : 'rgba(255,255,255,0.05)', padding: '12px 18px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '14px', color: m.user === "You" ? 'white' : '#cbd5e1' }}>
+                {m.text}
+              </div>
+              <span style={{ fontSize: '9px', color: '#475569', display: 'block', marginTop: '4px', textAlign: m.user === "You" ? 'right' : 'left' }}>{m.time}</span>
             </div>
+          ))}
         </div>
-        <div style={{ marginTop: '20px', position: 'relative' }}>
-          <input style={{ width: '100%', padding: '15px', borderRadius: '12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} placeholder="Type a message..." />
-        </div>
+
+        <form onSubmit={handleSendMessage} style={{ padding: '30px', borderTop: '1px solid rgba(255,255,255,0.05)', background: '#0b1120' }}>
+          <div style={{ position: 'relative' }}>
+            <input 
+              style={{ width: '100%', padding: '16px 50px 16px 20px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', boxSizing: 'border-box' }}
+              placeholder="Type a message..."
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+            />
+            <button type="submit" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer' }}>
+              <Send size={20} />
+            </button>
+          </div>
+        </form>
       </div>
 
     </div>
