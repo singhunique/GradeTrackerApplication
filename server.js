@@ -57,8 +57,19 @@ app.use('/api/contributions', require('./routes/contributions'));
 
 // 4. Production Deployment Logic
 if (process.env.NODE_ENV === 'production') {
-  const buildPath = path.join(__dirname, 'client', 'build');
+  // Use resolve to get the absolute path to the build folder
+  const buildPath = path.resolve(__dirname, 'client', 'build');
+  
   app.use(express.static(buildPath));
+
+  app.get('/*splat', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+      // Log for debugging (you can see this in Render logs)
+      console.log("Serving index.html from:", path.join(buildPath, 'index.html'));
+      res.sendFile(path.join(buildPath, 'index.html'));
+    }
+  });
+}
 
   // EXPRESS 5 FIX: The syntax "*splat" creates a named parameter 
   // that matches everything after the slash.
