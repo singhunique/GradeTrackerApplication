@@ -7,20 +7,21 @@ const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const handleLogin = (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     // Simulate a professional login delay
     setTimeout(() => {
-      console.log("Logging in with:", email);
+      // 1. Store the user's email in the browser's memory
+      localStorage.setItem('userEmail', email); 
       
-      // 2. CRITICAL FIX: Use the prop instead of 'navigate'
-      if (onLoginSuccess) {
-        onLoginSuccess(); 
-      }
-      
+      // 2. Extract a "Name" from the email (e.g., "john" from "john@gmail.com")
+      const displayName = email.split('@')[0];
+      localStorage.setItem('userName', displayName);
+
+      toast.success(`Logged in as ${displayName}`);
+      navigate('/dashboard'); 
       setIsLoading(false);
     }, 1500);
   };

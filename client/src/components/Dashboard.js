@@ -1,46 +1,71 @@
 import React, { useState } from 'react';
-import { Plus, CheckCircle2, User, ClipboardList, Send, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Added for logout
+import { Plus, CheckCircle2, User, ClipboardList, Send, Trash2, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
-  // 1. STATE MANAGEMENT
+  const navigate = useNavigate();
+  
+  // 1. Get info from localStorage
+  const userEmail = localStorage.getItem('userEmail') || 'Guest';
+  const userName = localStorage.getItem('userName') || 'Student';
+
+  // 2. State for Admin Toggle (Fixing the crash)
+  const adminEmail = 'your-personal-email@gmail.com'; 
+  const [isAdmin, setIsAdmin] = useState(userEmail === adminEmail);
+
   const [contributions, setContributions] = useState([
-    { id: 1, studentName: 'System', title: 'Tracker Initialized', status: 'Done', type: 'system' }
+    { id: 1, studentName: 'System', title: 'Contribution Tracker Live', status: 'Active', type: 'system' }
   ]);
   const [inputValue, setInputValue] = useState('');
-  const [studentNameInput, setStudentNameInput] = useState(''); // Only used by Admin to assign
-  const [isAdmin, setIsAdmin] = useState(true); // Toggle this to 'false' to test Student view
+  const [studentNameInput, setStudentNameInput] = useState('');
 
-  // 2. LOGIC TO ADD CONTRIBUTION OR ASSIGN TASK
+  const handleLogout = () => {
+    localStorage.clear(); // Clears token, email, and name
+    toast.success('Logged out');
+    navigate('/');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
     const newEntry = {
       id: Date.now(),
-      // If Admin, use the name they typed. If Student, it uses "Self"
-      studentName: isAdmin ? (studentNameInput || "Unassigned Student") : "My Contribution",
+      studentName: isAdmin ? (studentNameInput || "Team Member") : userName,
       title: inputValue,
       status: 'Pending',
-      type: isAdmin ? 'assigned' : 'self'
+      type: isAdmin ? 'assigned' : 'self',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
     setContributions([newEntry, ...contributions]);
     setInputValue('');
     setStudentNameInput('');
-    toast.success(isAdmin ? 'Task Assigned to Student!' : 'Your contribution was added!');
+    toast.success(isAdmin ? 'Task Assigned!' : 'Contribution Tracked!');
   };
 
   return (
     <div style={{ padding: '30px', maxWidth: '1000px', margin: '0 auto', color: 'white' }}>
       
-      {/* --- ROLE TOGGLE (For Testing Only) --- */}
-      <div style={{ marginBottom: '20px', textAlign: 'right' }}>
-        <button 
-          onClick={() => setIsAdmin(!isAdmin)}
-          style={{ background: '#334155', color: '#94a3b8', border: 'none', padding: '5px 15px', borderRadius: '20px', cursor: 'pointer', fontSize: '11px' }}>
-          SWITCH TO {isAdmin ? 'STUDENT VIEW' : 'ADMIN VIEW'}
-        </button>
+      {/* --- HEADER & LOGOUT --- */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div>
+          <h1 style={{ fontSize: '24px', margin: 0 }}>Project Hub</h1>
+          <p style={{ color: '#64748b', fontSize: '14px' }}>Welcome, {userName}</p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button 
+            onClick={() => setIsAdmin(!isAdmin)}
+            style={{ background: '#334155', color: '#94a3b8', border: 'none', padding: '8px 15px', borderRadius: '20px', cursor: 'pointer', fontSize: '11px' }}>
+            {isAdmin ? 'ADMIN VIEW' : 'STUDENT VIEW'} (Toggle)
+          </button>
+          <button 
+            onClick={handleLogout}
+            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <LogOut size={18} /> Logout
+          </button>
+        </div>
       </div>
 
       {/* --- INPUT SECTION --- */}
@@ -106,7 +131,7 @@ const Dashboard = () => {
                   color: item.type === 'assigned' ? '#3b82f6' : '#10b981',
                   fontWeight: 'bold'
                 }}>
-                  {item.type === 'assigned' ? 'ADMIN ASSIGNED' : 'STUDENT ADDED'}
+                  {item.type === 'assigned' ? 'ADMIN ASSIGNED' : item.type === 'system' ? 'SYSTEM' : 'STUDENT ADDED'}
                 </span>
               </div>
               <h4 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>{item.title}</h4>
@@ -115,6 +140,7 @@ const Dashboard = () => {
               </div>
             </div>
             
+            {/* Only Admin or the System should probably delete, but here is your trash icon */}
             <button 
               onClick={() => setContributions(contributions.filter(c => c.id !== item.id))}
               style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>

@@ -4,16 +4,11 @@ import { Toaster } from 'react-hot-toast';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
-
+import ProtectedRoute from './components/ProtectedRoute';
 function App() {
   return (
-    <div style={{ 
-      backgroundColor: '#020617', 
-      minHeight: '100vh',
-      color: 'white',
-      fontFamily: 'system-ui, -apple-system, sans-serif' 
-    }}>
-      <Toaster position="top-center" reverseOrder={false} />
+    <div style={{ /* ... your styles */ }}>
+      <Toaster position="top-center" />
 
       <Routes>
         {/* Public Routes */}
@@ -21,9 +16,16 @@ function App() {
         <Route path="/register" element={<Register />} />
         
         {/* Protected Route */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
 
-        {/* Catch-all: Redirect to Login */}
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
