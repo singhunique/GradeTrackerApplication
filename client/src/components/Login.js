@@ -59,7 +59,7 @@ const Login = ({ onLoginSuccess }) => {
             <ShieldCheck size={32} color="#3b82f6" />
           </div>
           <h1 style={{ color: 'white', fontSize: '32px', fontWeight: '900', margin: 0, letterSpacing: '-1.5px' }}>
-            WELCOME<span style={{ color: '#3b82f6' }}>.</span>BACK
+            Tracker<span style={{ color: '#3b82f6' }}>.</span>BACK
           </h1>
           <p style={{ color: '#64748b', fontSize: '14px', marginTop: '8px' }}>Enter credentials to access the Portal</p>
         </div>
