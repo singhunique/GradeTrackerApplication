@@ -57,21 +57,23 @@ app.use('/api/contributions', require('./routes/contributions'));
 
 // 4. Production Deployment Logic
 if (process.env.NODE_ENV === 'production') {
-  // 1. Force the path to point to the build folder correctly
+  // Use path.join for consistent cross-platform paths
   const buildPath = path.join(__dirname, 'client', 'build');
-  
-  // 2. Serve static files from that path
+
+  // Middleware: Log every request to see where it's looking (Check Render logs!)
+  app.use((req, res, next) => {
+    console.log(`🔍 Request for: ${req.url}`);
+    next();
+  });
+
+  // Serve static files (CSS, JS, Images)
   app.use(express.static(buildPath));
 
-  // 3. Catch-all route for React Router (Express 5 compatible)
-  app.get('/*splat', (req, res) => {
-    // Only send index.html if the request is NOT for an API
+  // Catch-all: Send index.html for any frontend route
+  // The syntax "/{*splat}" is the most compatible catch-all for Express 5
+  app.get('/{*splat}', (req, res) => {
     if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(buildPath, 'index.html'), (err) => {
-        if (err) {
-          res.status(500).send("Error loading frontend. Check build path: " + buildPath);
-        }
-      });
+      res.sendFile(path.join(buildPath, 'index.html'));
     }
   });
 }
