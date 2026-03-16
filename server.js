@@ -52,14 +52,13 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/contributions', require('./routes/contributions'));
 
-// 4. Deployment Logic (Consolidated)
+/// --- UPDATED DEPLOYMENT LOGIC FOR EXPRESS 5 ---
 if (process.env.NODE_ENV === 'production') {
-  // Use the build folder inside the client directory
   const buildPath = path.join(__dirname, 'client/build');
   app.use(express.static(buildPath));
 
-  app.get('*', (req, res) => {
-    // If the request is not for an API, send the React index.html
+  // Change '*' to '*path' to satisfy Express 5 naming requirements
+  app.get('*path', (req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(buildPath, 'index.html'));
     }
