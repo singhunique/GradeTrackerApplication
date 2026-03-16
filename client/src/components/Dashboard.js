@@ -1,32 +1,22 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Plus, User, ClipboardList, Send, Trash2, LogOut, 
-  LayoutDashboard, Settings, Bell, CheckCircle2 
-} from 'lucide-react';
+import { Plus, CheckCircle2, User, ClipboardList, Send, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+
 const Dashboard = () => {
-  const navigate = useNavigate();
-  
-  // Auth Data
+  // Get the logged-in user's info
   const userEmail = localStorage.getItem('userEmail') || 'Guest';
   const userName = localStorage.getItem('userName') || 'Student';
-  const adminEmail = 'your-personal-email@gmail.com'; 
-  const [isAdmin, setIsAdmin] = useState(userEmail === adminEmail);
 
-  // State
+  // SET YOUR ADMIN EMAIL HERE
+  const adminEmail = 'your-personal-email@gmail.com'; 
+  const isAdmin = userEmail === adminEmail;
+
   const [contributions, setContributions] = useState([
-    { id: 1, studentName: 'System', title: 'Tracker.BACK Live', status: 'Active', type: 'system', timestamp: '09:00 AM' }
+    { id: 1, studentName: 'System', title: 'Contribution Tracker Live', status: 'Active', type: 'system' }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [studentNameInput, setStudentNameInput] = useState('');
-
-  const handleLogout = () => {
-    localStorage.clear();
-    toast.success('Logged out successfully');
-    navigate('/');
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,6 +24,8 @@ const Dashboard = () => {
 
     const newEntry = {
       id: Date.now(),
+      // If you are admin, you assign to the name you typed. 
+      // If you are a student, it uses your own name.
       studentName: isAdmin ? (studentNameInput || "Team Member") : userName,
       title: inputValue,
       status: 'Pending',
@@ -48,119 +40,99 @@ const Dashboard = () => {
   };
 
   return (
-    <div style={containerStyle}>
-      {/* --- SIDEBAR --- */}
-      <aside style={sidebarStyle}>
-        <div style={{ padding: '40px 20px' }}>
-          <h1 style={{ color: 'white', fontSize: '22px', fontWeight: '900', letterSpacing: '-1px', marginBottom: '40px' }}>
-            Tracker<span style={{ color: '#3b82f6' }}>.</span>B
-          </h1>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={navItemActive}><LayoutDashboard size={20} /> Dashboard</div>
-            <div style={navItem}><Bell size={20} /> Notifications</div>
-            <div style={navItem}><Settings size={20} /> Settings</div>
-          </nav>
-        </div>
-        <button onClick={handleLogout} style={logoutButtonStyle}>
-          <LogOut size={20} /> Logout
+    <div style={{ padding: '30px', maxWidth: '1000px', margin: '0 auto', color: 'white' }}>
+      
+      {/* --- ROLE TOGGLE (For Testing Only) --- */}
+      <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+        <button 
+          onClick={() => setIsAdmin(!isAdmin)}
+          style={{ background: '#334155', color: '#94a3b8', border: 'none', padding: '5px 15px', borderRadius: '20px', cursor: 'pointer', fontSize: '11px' }}>
+          SWITCH TO {isAdmin ? 'STUDENT VIEW' : 'ADMIN VIEW'}
         </button>
-      </aside>
+      </div>
 
-      {/* --- MAIN CONTENT --- */}
-      <main style={mainContentStyle}>
-        {/* Header */}
-        <header style={headerStyle}>
-          <div>
-            <h2 style={{ fontSize: '28px', fontWeight: '800', margin: 0 }}>Welcome back, {userName}</h2>
-            <p style={{ color: '#64748b', fontSize: '14px' }}>Here is what's happening with your project.</p>
-          </div>
-          <button onClick={() => setIsAdmin(!isAdmin)} style={toggleButtonStyle}>
-            {isAdmin ? 'ADMIN VIEW' : 'STUDENT VIEW'}
-          </button>
-        </header>
-
-        {/* Stats Section */}
-        <div style={statsGrid}>
-          <div style={statCard}>
-            <p style={statLabel}>Total Tasks</p>
-            <h3 style={statValue}>{contributions.length}</h3>
-          </div>
-          <div style={statCard}>
-            <p style={statLabel}>Role</p>
-            <h3 style={{ ...statValue, color: '#3b82f6' }}>{isAdmin ? 'Admin' : 'Member'}</h3>
-          </div>
-        </div>
-
-        {/* Action Card (Input) */}
-        <section style={glassCard}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px', marginBottom: '20px' }}>
-            <ClipboardList color="#3b82f6" /> {isAdmin ? "Assign New Task" : "Log Contribution"}
-          </h3>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
-            {isAdmin && (
-              <input 
-                value={studentNameInput}
-                onChange={(e) => setStudentNameInput(e.target.value)}
-                placeholder="Student Name"
-                style={inputStyle}
-              />
-            )}
+      {/* --- INPUT SECTION --- */}
+      <div style={{ 
+        background: 'rgba(15, 23, 42, 0.8)', 
+        padding: '30px', 
+        borderRadius: '30px', 
+        border: '1px solid rgba(59, 130, 246, 0.2)',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+        marginBottom: '40px'
+      }}>
+        <h2 style={{ fontSize: '22px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <ClipboardList color="#3b82f6" /> 
+          {isAdmin ? "Assign Project Task" : "Add Your Contribution"}
+        </h2>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {isAdmin && (
+            <input 
+              value={studentNameInput}
+              onChange={(e) => setStudentNameInput(e.target.value)}
+              placeholder="Enter Student Name (e.g. Sarah Smith)"
+              style={{ padding: '15px', borderRadius: '12px', background: '#0f172a', border: '1px solid #334155', color: 'white' }}
+            />
+          )}
+          <div style={{ display: 'flex', gap: '10px' }}>
             <input 
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={isAdmin ? "Task details..." : "What did you achieve today?"}
-              style={{ ...inputStyle, flex: 2 }}
+              placeholder={isAdmin ? "Task Title (e.g. Final Presentation Slides)" : "What did you work on? (e.g. Fixed Header CSS)"}
+              style={{ flex: 1, padding: '15px', borderRadius: '12px', background: '#0f172a', border: '1px solid #334155', color: 'white' }}
             />
-            <button type="submit" style={sendButtonStyle}><Send size={20} /></button>
-          </form>
-        </section>
+            <button type="submit" style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0 25px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+              <Send size={18} />
+            </button>
+          </div>
+        </form>
+      </div>
 
-        {/* Feed Section */}
-        <h3 style={sectionTitle}>Live Activity Feed</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {contributions.map((item) => (
-            <div key={item.id} style={itemCard}>
-              <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                <div style={itemIcon(item.type)}>
-                  {item.type === 'assigned' ? <Plus size={18} /> : <CheckCircle2 size={18} />}
-                </div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: '16px' }}>{item.title}</h4>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
-                    <User size={10} style={{ display: 'inline' }} /> {item.studentName} • {item.timestamp}
-                  </p>
-                </div>
+      {/* --- FEED SECTION --- */}
+      <h3 style={{ fontSize: '14px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '20px' }}>
+        Live Contribution Feed
+      </h3>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        {contributions.map((item) => (
+          <div key={item.id} style={{ 
+            background: 'rgba(30, 41, 59, 0.4)', 
+            padding: '20px', 
+            borderRadius: '20px', 
+            border: '1px solid rgba(255,255,255,0.05)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                <span style={{ 
+                  fontSize: '10px', 
+                  padding: '2px 8px', 
+                  borderRadius: '10px', 
+                  background: item.type === 'assigned' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                  color: item.type === 'assigned' ? '#3b82f6' : '#10b981',
+                  fontWeight: 'bold'
+                }}>
+                  {item.type === 'assigned' ? 'ADMIN ASSIGNED' : 'STUDENT ADDED'}
+                </span>
               </div>
-              <button onClick={() => setContributions(contributions.filter(c => c.id !== item.id))} style={deleteButtonStyle}>
-                <Trash2 size={18} />
-              </button>
+              <h4 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>{item.title}</h4>
+              <div style={{ fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <User size={12} /> {item.studentName}
+              </div>
             </div>
-          ))}
-        </div>
-      </main>
+            
+            <button 
+              onClick={() => setContributions(contributions.filter(c => c.id !== item.id))}
+              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+              <Trash2 size={18} />
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
-
-// --- STYLES ---
-const containerStyle = { display: 'flex', backgroundColor: '#020617', minHeight: '100vh', color: 'white', fontFamily: 'system-ui, sans-serif' };
-const sidebarStyle = { width: '260px', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: '#020617' };
-const mainContentStyle = { flex: 1, padding: '40px', overflowY: 'auto' };
-const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' };
-const statsGrid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' };
-const glassCard = { background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(10px)', border: '1px solid rgba(59, 130, 246, 0.1)', padding: '30px', borderRadius: '24px', marginBottom: '30px' };
-const itemCard = { background: 'rgba(30, 41, 59, 0.3)', padding: '16px 24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
-const inputStyle = { background: '#020617', border: '1px solid #1e293b', padding: '14px', borderRadius: '12px', color: 'white', outline: 'none' };
-const sendButtonStyle = { background: '#3b82f6', color: 'white', border: 'none', padding: '0 20px', borderRadius: '12px', cursor: 'pointer' };
-const navItem = { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 20px', color: '#64748b', cursor: 'pointer' };
-const navItemActive = { ...navItem, color: '#3b82f6', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px' };
-const statCard = { background: 'rgba(15, 23, 42, 0.8)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' };
-const statLabel = { color: '#64748b', margin: 0, fontSize: '12px', textTransform: 'uppercase' };
-const statValue = { margin: '5px 0 0 0', fontSize: '24px', fontWeight: '800' };
-const toggleButtonStyle = { background: '#1e293b', border: 'none', color: '#94a3b8', padding: '8px 16px', borderRadius: '10px', fontSize: '11px', cursor: 'pointer' };
-const logoutButtonStyle = { margin: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '20px' };
-const sectionTitle = { fontSize: '12px', color: '#475569', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '20px' };
-const deleteButtonStyle = { background: 'none', border: 'none', color: '#475569', cursor: 'pointer' };
-const itemIcon = (type) => ({ width: '40px', height: '40px', borderRadius: '12px', background: type === 'assigned' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)', color: type === 'assigned' ? '#3b82f6' : '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' });
 
 export default Dashboard;
