@@ -60,9 +60,9 @@ if (process.env.NODE_ENV === 'production') {
   const buildPath = path.join(__dirname, 'client', 'build');
   app.use(express.static(buildPath));
 
-  // EXPRESS 5 SAFE CATCH-ALL: 
-  // ":path*" defines a named parameter that matches everything
-  app.get('/:path*', (req, res) => {
+  // EXPRESS 5 FIX: The syntax "*splat" creates a named parameter 
+  // that matches everything after the slash.
+  app.get('/*splat', (req, res) => {
     if (!req.path.startsWith('/api')) {
       res.sendFile(path.join(buildPath, 'index.html'));
     }
