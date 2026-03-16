@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path');
+const path = require('path'); // Declared once here
 require('dotenv').config();
 
 const app = express();
@@ -52,28 +52,22 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/contributions', require('./routes/contributions'));
 
-// 4. Serve Frontend Static Files
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-// 5. THE FIX FOR EXPRESS 5 (The "Catch-All")
-// We use '*any' to give the wildcard a name, which Express 5 requires.
-app.get('*any', (req, res) => {
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ message: "API endpoint not found" });
-  }
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-});
-
-// 6. Start Server
-const PORT = process.env.PORT || 10000;
-// Serve static files from the React app
-const path = require('path');
+// 4. Deployment Logic (Consolidated)
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  // Use the build folder inside the client directory
+  const buildPath = path.join(__dirname, 'client/build');
+  app.use(express.static(buildPath));
+
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+    // If the request is not for an API, send the React index.html
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(buildPath, 'index.html'));
+    }
   });
 }
+
+// 5. Start Server
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
