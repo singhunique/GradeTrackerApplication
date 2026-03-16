@@ -57,19 +57,17 @@ app.use('/api/contributions', require('./routes/contributions'));
 
 // 4. Production Deployment Logic
 if (process.env.NODE_ENV === 'production') {
-  // Point to the build folder inside your client directory
   const buildPath = path.join(__dirname, 'client', 'build');
   app.use(express.static(buildPath));
 
-  // Fix for Express 5: Named wildcard '(.*)' to avoid PathError
-  app.get('(.*)', (req, res) => {
-    // If request isn't for an API, serve the React frontend
+  // EXPRESS 5 SAFE CATCH-ALL: 
+  // ":path*" defines a named parameter that matches everything
+  app.get('/:path*', (req, res) => {
     if (!req.path.startsWith('/api')) {
       res.sendFile(path.join(buildPath, 'index.html'));
     }
   });
 }
-
 // 5. Start Server
 // Render usually uses 10000, local usually 5000
 const PORT = process.env.PORT || 5000;
